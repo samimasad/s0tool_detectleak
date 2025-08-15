@@ -2,7 +2,7 @@
 # Bron : https://www.huizebruin.nl
 # Bron File : https://github.com/huizebruin/s0tool/tree/main/esphome
 # © Huizebruin.nl
-#  # ⬇ Enable Home Assistant API ⬇ # 
+#  # ⬇ Enable Home Assistant API ⬇ #
 api:
   services:
     - service: meterstand_water
@@ -20,11 +20,11 @@ globals:
   - id: initial_water_usage
     type: float
     restore_value: yes
-#    initial_value: '010'
+    initial_value: '0'
   - id: total_water_pulses
     type: int
     restore_value: yes
-  
+    initial_value: '0'
 
 #   # ⬇ Water per liter rate ⬇ #
 number:
@@ -47,21 +47,22 @@ binary_sensor:
   - platform: gpio
     id: water_sensor_status
     name: "Water sensor status"
-    internal: False
+    internal: false
+    use_interrupt: false
     pin:
       number: D2
-      allow_other_uses: true
       inverted: true
       mode:
         input: true
+      allow_other_uses: true
     on_press:
-      - then:
-          lambda: id(total_water_pulses) += 1;
+      - lambda: |-
+          id(total_water_pulses) += 1;
 sensor:
 #------------------------# Watermeter #------------------------#
 # ⬇ watermeter pulsen ⬇ #
   - platform: pulse_counter
-    pin: 
+    pin:
       number: D2
       allow_other_uses: true
     id: watermeter_pulse
@@ -74,7 +75,7 @@ sensor:
     filters:
       lambda: return (x / (id(select_flow_pulse).state * 60 ));
 
-# ⬇ Totaal watermeter ⬇ #      
+# ⬇ Totaal watermeter ⬇ #
     total:
       id: sensor_pulse_meter_total
       name: "Total Liters"
@@ -85,7 +86,7 @@ sensor:
       filters:
         lambda: return (x / (id(select_flow_pulse).state * 60 ));
 
-      
+
 # ⬇ Total M3 ⬇ #
   - platform: template
     id: watermeter_total
@@ -103,7 +104,7 @@ sensor:
     state_class: "total_increasing"
     accuracy_decimals: 0
     lambda: return id(initial_water_usage);
-    
+
   - platform: template
     id: watermeter_q_test
     name: "watermeter Q test"
