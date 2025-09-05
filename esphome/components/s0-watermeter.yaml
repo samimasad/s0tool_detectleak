@@ -21,10 +21,11 @@ globals:
   - id: initial_water_usage
     type: float
     restore_value: yes
-    initial_value: '010'
+    initial_value: '0'
   - id: total_water_pulses
     type: int
     restore_value: yes
+    initial_value: '0'
     
 select:
   # ⬇ water per m3 rate ⬇ #
@@ -40,18 +41,18 @@ select:
       - "0.1"
     initial_option: "0.001"
     restore_value: yes
-    on_value:
-      then:
-        - logger.log:
-            format: "Chosen option: %s "
-            args: ["x.c_str()"]
-
-#------------------------# Watermeter #------------------------#
+    # on_value:
+    #   then:
+    #     - logger.log:
+    #         format: "Chosen option: %s (index %d)"
+    #         args: ["x.c_str()", "i"]#------------------------# Watermeter #------------------------#
+    
 binary_sensor:
   - platform: gpio
     id: water_sensor_status
     name: "Water sensor status"
-    internal: False
+    internal: false
+    use_interrupt: false
     pin:
       number: D2
       allow_other_uses: true

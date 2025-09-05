@@ -2,7 +2,7 @@
 # Bron : https://www.huizebruin.nl
 # Bron File : https://github.com/samimasad/s0tool_detectleak/tree/main/esphome
 # © Huizebruin.nl
-#  # ⬇ Enable Home Assistant API ⬇ # 
+#  # ⬇ Enable Home Assistant API ⬇ #
 api:
   services:
     - service: meterstand_water
@@ -20,10 +20,11 @@ globals:
   - id: initial_water_usage
     type: float
     restore_value: yes
-    initial_value: '010'
+    initial_value: '0'
   - id: total_water_pulses
     type: int
     restore_value: yes
+    initial_value: '0'
 
 select:
   # ⬇ water per m3 rate ⬇ #
@@ -39,27 +40,29 @@ select:
       - "0.1"
     initial_option: "0.001"
     restore_value: yes
-    on_value:
-      then:
-        - logger.log:
-            format: "Chosen option: %s "
-            args: ["x.c_str()"]
+    # on_value:
+    #   then:
+    #     - logger.log:
+    #         format: "Chosen option: %s "
+    #         args: ["x.c_str()"]
 
 #------------------------# Watermeter #------------------------#
 binary_sensor:
   - platform: gpio
     id: water_sensor_status
     name: "Water sensor status"
-    internal: False
+    internal: false
+    use_interrupt: false
     pin:
       number: D2
       allow_other_uses: true
       inverted: true
       mode:
         input: true
+      allow_other_uses: true
     on_press:
-      - then:
-          lambda: id(total_water_pulses) += 1;
+      - lambda: |-
+          id(total_water_pulses) += 1;
 
 #https://github.com/samimasad/s0tool_detectleak/issues/156
 number:
@@ -83,7 +86,7 @@ sensor:
   - platform: pulse_meter #pulse_counter
     internal_filter_mode: "PULSE"
     internal_filter: 50ms
-    pin: 
+    pin:
       number: D2
       allow_other_uses: true
     id: watermeter_flow
@@ -108,6 +111,7 @@ sensor:
       filters:
         - multiply: 0.001
 
+
 # ⬇ Watermeter stand bij benadering ⬇ #
   - platform: template
     id: watermeter_total
@@ -128,3 +132,15 @@ sensor:
     accuracy_decimals: 0
     lambda: return id(total_water_pulses);
     internal: True
+
+# ⬇ Totaal watermeter in liter ⬇
+  - platform: template
+    name: "watermeter Totaal (L)"
+    unit_of_measurement: "L"
+    accuracy_decimals: 0
+    icon: mdi:water
+    lambda: |-
+      return id(sensor_pulse_meter_total).state * 1000;
+    update_interval: 10s
+    state_class: "total_increasing"
+    device_class: water
