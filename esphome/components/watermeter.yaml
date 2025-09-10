@@ -55,7 +55,6 @@ binary_sensor:
     use_interrupt: false
     pin:
       number: D2
-      allow_other_uses: true
       inverted: true
       mode:
         input: true
@@ -91,7 +90,7 @@ sensor:
       allow_other_uses: true
     id: watermeter_flow
     name: "watermeter flow"
-    timeout: 700s
+    timeout: 600s
     state_class: measurement
     unit_of_measurement: "l/min"
     accuracy_decimals: 1
